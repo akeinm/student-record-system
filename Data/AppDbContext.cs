@@ -13,7 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Unit> Units => Set<Unit>();
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
 
-    protected override void onModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Course>().HasData(
             new Course { Id = 1, CourseCode = "BSC-CS", Name = "Bachelor of Computer Science", TotalCreditPoints = 300 }

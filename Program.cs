@@ -1,10 +1,19 @@
 using StudentRecordSystem.Components;
+using Microsoft.EntityFrameworkCore;
+using StudentRecordSystem.Data;
+using StudentRecordSystem.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options.UseSqlite("Data Source=studentrecords.db"));
+
+builder.Services.AddScoped<CurrentUserService>();
 
 var app = builder.Build();
 
