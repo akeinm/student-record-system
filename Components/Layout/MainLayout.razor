@@ -1,4 +1,10 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.EntityFrameworkCore
+@using StudentRecordSystem.Data
+@using StudentRecordSystem.Models
+@using StudentRecordSystem.Services
+@inject StudentRecordSystem.Services.CurrentUserService CurrentUser
+@inject IDbContextFactory<AppDbContext> DbFactory
 
 <div class="page">
     <div class="sidebar">
@@ -7,17 +13,57 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <div style="margin-right: auto; display:flex; align-items:center; gap:10px;">
+                <span>Role:</span>
+                <select value="@CurrentUser.Role" @onchange="OnRoleChanged">
+                    <option value="Admin">Admin</option>
+                    <option value="Student">Student</option>
+                </select>
+
+                @if (CurrentUser.Role == UserRole.Student)
+                {
+                    <span>Viewing as:</span>
+                    <select @onchange="OnStudentChanged">
+                        <option value="">-- select student --</option>
+                        @foreach (var s in students)
+                        {
+                            <option value="@s.Id">@s.FullName (@s.StudentNumber)</option>
+                        }
+                    </select>
+                }
+            </div>
+            <a href="https://learn.microsoft.com/en-us/aspnet/core/" target="_blank">About</a>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
+
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
+<div id ="blazor-error-ui" data-nosnippet>
+    An unhandled error has occured.
     <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <span class="dismiss"></span>
 </div>
+
+@code {
+    private List<Student> students = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+        students = await db.Students.ToListAsync();
+    }
+
+    private void OnRoleChanged(ChangeEventArgs e)
+    {
+        CurrentUser.Role = e.Value?.ToString() == "Students" ? UserRole.Student : UserRole.Admin;
+        if (CurrentUser.Role == UserRole.Admin) CurrentUser.StudentId = null;
+    }
+    private void OnStudentChanged(ChangeEventArgs e)
+    {
+        CurrentUser.StudentId = int.TryParse(e.Value?.ToString(), out var id) ? id : null;
+    }
+}
