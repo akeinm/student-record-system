@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@implements IDisposable
+@inject StudentRecordSystem.Services.CurrentUserService CurrentUser
+@using StudentRecordSystem.Services
+
+<div class="top row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">StudentRecordSystem</a>
     </div>
@@ -9,11 +13,42 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Home</NavLink>
         </div>
 
+        @if (CurrentUser.Role == UserRole.Admin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="students">Students</NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="courses">Courses</NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="units">Units</NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="enrollments">Enrollments</NavLink>
+            </div>
+        }
+        else
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="myrecord">My Record</NavLink>
+            </div>
+        }
     </nav>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        CurrentUser.OnChange += StateHasChanged;
+    }
+
+    public void Dispose ()
+    {
+        CurrentUser.OnChange += StateHasChanged;
+    }
+}
 
