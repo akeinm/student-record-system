@@ -6,3 +6,109 @@
 
 <PageTitle>Students</PageTitle>
 <h1>Students</h1>
+
+@if (students == null)
+{
+    <p>Loading</p>
+}
+
+else
+{
+    <table class="table">
+        <thead><tr><th>Number</th><th>Name</th><th>Course</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var s in students)
+            {
+                <tr>
+                    <td>@s.StudentNumber</td>
+                    <td>@s.FullName</td>
+                    <td>@(courses.FirstorDefault(c => c.Id == s.CourseId)?.Name)</td>
+                    <td>@s.AcademicStatus</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => Edit(s)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => Delete(s.Id)">Delete</button>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h3>@(editingId == null ? "Add Student" : "Edit Student" </h3>
+    <EditForm Model="formModel" OnValidSubmit="Save">
+        <div><label>Student Number: <InputText @bind-Value="formModel.StudentNumber" /></label></div>
+        <div><label>Full Name: <InputText @bind-Value="formModel.FullName" /></label></div>
+        <div><label>Email: <InputText @bind-Value="formModel.Email" /></label></div>
+        <div><label>Status: <InputText @bind-Value="formModel.AcademicStatus" /></label></div>
+        <div>
+            <label>Course:
+                <select @bind="formModel.CourseId">
+                    @foreach (var c in courses)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </label>
+        </div>
+        <button class="btn btn-primary mt-2" type="submit">Save</button>
+        @if (editingId != null)
+        {
+            <button class="btn btn-outline-secondary mt-2" type="button" @onclick="ResetForm">Cancel</button>
+        }
+    </EditForm>
+
+}
+
+@code {
+    private List<Student>? students;
+    private List<Course> courses = new();
+
+    private Student formModel = new();
+    private int? editingId;
+
+    protected override async Task Load()
+    {
+        using var db = DbFactory.CreateDbContext();
+        students = await db.Students.ToListAsync();
+        courses = await db.Courses.ToListAsync();
+        if (formModel.CourseId == 0 && courses.Any()) formModel.CourseId = courses.First().Id;
+    }
+
+    private void Edit(Student s)
+    {
+        editingId = s.Id;
+        formModel = new Student { Id = s.Id, StudentNumber = s.StudentNumber, FullName = s.FullName, Email = s.Email, AcademicStatus = s.AcademicStatus, CourseId = s.CourseId };
+    }
+
+    private void ResetForm()
+    {
+        editingId = null;
+        formModel = new Student { CourseId = courses.FirstOrDefault()?.Id ?? 0 };
+    }
+
+    private async Task Save()
+    {
+        using var db = DbFactory.CreateDbContext();
+        if (editingId == null)
+        {
+            db.Students.Add(formModel);
+        }
+        else
+        {
+            db.Students.Update(formModel);
+        }
+        await db.SaveChangesAsync();
+        ResetForm();
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        using s = await db.Students.FindAsync(id);
+        if (s != null) { db.Students.Remove(s); await db.SaveChangesAsync(); }
+    }
+
+}
+
+
