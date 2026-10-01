@@ -22,7 +22,7 @@ else
                 <tr>
                     <td>@s.StudentNumber</td>
                     <td>@s.FullName</td>
-                    <td>@(courses.FirstorDefault(c => c.Id == s.CourseId)?.Name)</td>
+                    <td>@(courses.FirstOrDefault(c => c.Id == s.CourseId)?.Name)</td>
                     <td>@s.AcademicStatus</td>
                     <td>
                         <button class="btn btn-sm btn-secondary" @onclick="() => Edit(s)">Edit</button>
@@ -34,7 +34,7 @@ else
         </tbody>
     </table>
 
-    <h3>@(editingId == null ? "Add Student" : "Edit Student" </h3>
+    <h3>@(editingId == null ? "Add Student" : "Edit Student") </h3>
     <EditForm Model="formModel" OnValidSubmit="Save">
         <div><label>Student Number: <InputText @bind-Value="formModel.StudentNumber" /></label></div>
         <div><label>Full Name: <InputText @bind-Value="formModel.FullName" /></label></div>
@@ -66,7 +66,8 @@ else
     private Student formModel = new();
     private int? editingId;
 
-    protected override async Task Load()
+    protected override async Task OnInitializedAsync() => await Load();
+    private async Task Load()
     {
         using var db = DbFactory.CreateDbContext();
         students = await db.Students.ToListAsync();
@@ -105,8 +106,9 @@ else
     private async Task Delete(int id)
     {
         using var db = DbFactory.CreateDbContext();
-        using s = await db.Students.FindAsync(id);
+        var s = await db.Students.FindAsync(id);
         if (s != null) { db.Students.Remove(s); await db.SaveChangesAsync(); }
+        await Load();
     }
 
 }
