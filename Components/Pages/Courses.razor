@@ -4,3 +4,56 @@
 @using StudentRecordSystem.Models
 @inject IDbContextFactory<AppDbContext> DbFactory
 
+<PageTitle>Courses</PageTitle>
+<h1>Courses</h1>
+
+<table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Total Credit Points</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var c in courses)
+        {
+            <tr>
+                <td>@c.CourseCode</td><td>@c.Name</td><td>@c.TotalCreditPoints</td>
+                <td><button class="btn btn-sm btn-danger" @onclick="() => Delete(c.Id)">Delete</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Add Course</h3>
+<EditForm Model="formModel" OnValidSubmit="Save">
+    <div><label>Course Code: <InputText @bind-Value="formModel.CourseCode" /></label></div>
+    <div><label>Name: <InputText @bind-Value="formModel.Name" /></label></div>
+    <div><label>Total Credit Points: <InputNumber @bind-Value="formModel.TotalCreditPoints" /></label></div>
+    <button class="btn btn-primary mt-2" type="submit">Add</button>
+</EditForm>
+
+@code {
+    private List<Course> courses = new();
+    private Course formModel = new();
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        using var db = DbFactory.CreateDbContext();
+        courses = await db.Courses.ToListAsync();
+    }
+
+    private async Task Save()
+    {
+        using var db = DbFactory.CreateDbContext();
+        db.Courses.Add(formModel);
+        await db.SaveChangesAsync();
+        formModel = new Course();
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        var c = await db.Courses.FindAsync(id);
+        if (c != null) { db.Courses.Remove(c); await db.SaveChangesAsync(); }
+        await Load();
+    }
+}
