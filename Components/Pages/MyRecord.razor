@@ -1,0 +1,11 @@
+@page "/enrollments"
+@using Microsoft.EntityFrameworkCore
+@using StudentRecordSystem.Data
+@using StudentRecordSystem.Models
+@using StudentRecordSystem.Services
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject CurrentUserService CurrentUser
+
+<PageTitle>My Record</PageTitle>
+<h1>My Record</h1>
+
