@@ -6,3 +6,86 @@
 
 <PageTitle>Enrollments</PageTitle>
 <h1>Enrollments & Grades</h1>
+
+<table class="table">
+    <thead><tr><th>Student</th><th>Unit</th><th>Semester</th><th>Mark</th><th>Grade</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var e in enrollments)
+        {
+            <tr>
+                <td>@(students.FirstOrDefault (s => s.Id == e.StudentId)?.FullName)</td>
+                <td>@(units.FirstOrDefault (u => u.Id == e.UnitId)?.UnitCode)</td>
+                <td>@e.Semester</td>
+                <td>@(e.Mark?.ToString() ?? "Pending")</td>
+                <td>@e.Grade</td>
+                <td><button class="btn btn-sm btn-danger" @onclick="() => Delete(e.Id)">Delete</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Add Enrollment / Enter Mark</h3>
+<EditForm Model = "formModel" OnValidSubmit="Save">
+    <div>
+        <label>Student:
+            <select @bind="formModel.StudentId">
+                @foreach (var s in students)
+                {
+                    <option value="@s.Id">@s.FullName (@s.StudentNumber)</option>
+                }
+            </select>
+        </label>
+    </div>
+    <div>
+        <label>Unit:
+            <select @bind="formModel.UnitId">
+                @foreach (var u in units)
+                {
+                    <option value="@u.Id">@u.UnitCode (@u.Name)</option>
+                }
+            </select>
+        </label>
+    </div>
+    <div><label>Semester: <InputText @bind-Value="formModel.Semester" placeholder="e.g. 2026-S1" /></label></div>
+    <div><label>Mark: <InputNumber @bind-Value="formModel.Mark" /></label></div>
+    <div><label>Grade: <InputText @bind-Value="formModel.Grade" placeholder="e.g. D, C, HD" /></label></div>
+    <button class="btn btn-primary mt-2" type="submit">Save</button>
+
+</EditForm>
+
+@code {
+    private List<Enrollment> enrollments = new();
+    private List<Student> students = new();
+    private List<Unit> units = new();
+    private Enrollment formModel = new();
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    protected async Task Load()
+    {
+        using var db = DbFactory.CreateDbContext();
+        enrollments = await db.Enrollments.ToListAsync();
+        students = await db.Students.ToListAsync();
+        units = await db.Units.ToListAsync();
+        if (formModel.StudentId == 0 && students.Any()) formModel.StudentId = students.First().Id;
+        if (formModel.UnitId == 0 && units.Any()) formModel.UnitId = units.First().Id;
+    }
+
+    private async Task Save()
+    {
+        using var db = DbFactory.CreateDbContext();
+        db.Enrollments.Add(formModel);
+        await db.SaveChangesAsync();
+        formModel = new Enrollment { StudentId = students.First().Id, UnitId = units.First().Id };
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        var e = await db.Enrollments.FindAsync(id);
+        if (e != null) { db.Enrollments.Remove(e); await db.SaveChangesAsync(); }
+        await Load();
+
+    }
+}
