@@ -1,4 +1,4 @@
-@page "/enrollments"
+@page "/myrecord"
 @using Microsoft.EntityFrameworkCore
 @using StudentRecordSystem.Data
 @using StudentRecordSystem.Models
@@ -9,3 +9,60 @@
 <PageTitle>My Record</PageTitle>
 <h1>My Record</h1>
 
+@if (CurrentUser.StudentId == null)
+{
+    <p><em>Select a student from the dropdown</em></p>
+}
+
+else if (student == null)
+{
+    <p>Loading</p>
+}
+else
+{
+    <p><strong>@student.FullName</strong> (@student.StudentNumber) &&middot; @course?.Name</p>
+    <p>Status: @student.AcademicStatus</p>
+
+    <table class="table">
+        <thead><tr><th>Unit</th><th>Semester</th><th>Mark</th><th>Grade</th></tr></thead>
+        <tbody>
+            @foreach (var e in student.Enrollments)
+            {
+                <tr>
+                    <td>@e.Unit?.UnitCode</td>
+                    <td>@e.Semester</td>
+                    <td>@(e.Mark?.ToString() ?? "Pending")</td>
+                    <td>@e.Grade</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div style="background: #f0eaff; padding: 10px 16px; display:inline-block; border-radius: 6px;">
+        <div>Current WAM</div>
+        <div style="font-size: 1.8rem; font-weigh: 600;">@WamCalculator.CalculateWam(student)</div>
+    </div>
+}
+
+@code {
+    private Student? student;
+    private Course? course;
+
+    protected override void OnInitialized()
+    {
+        CurrentUser.OnChange += async () => { await Load(); await InvokeAsync(StateHasChanged); };
+    }
+
+    protected override async Task OnParametersSetAsync() => await Load();
+
+    private async Task Load()
+    {
+        if (CurrentUser.StudentId == null) return;
+        using var db = DbFactory.CreateDbContext();
+        student = await db.Students
+            .Include(s => s.Enrollments).ThenInclude(e => e.Unit)
+            .FirstOrDefaultAsync (s => s.Id == CurrentUser.StudentId);
+        if (student != null)
+            course = await db.Courses.FindAsync(student.CourseId);
+    }
+}
