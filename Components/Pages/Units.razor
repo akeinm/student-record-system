@@ -7,3 +7,53 @@
 <PageTitle>Units</PageTitle>
 <h1>Units</h1>
 
+<table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Credit Points</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var u in units)
+        {
+            <tr>
+                <td>@u.UnitCode</td><td>@u.Name</td><td>@u.CreditPoints</td>
+                <td><button class="btn btn-sm btn-danger" @onclick="() => Delete(u.Id)">Delete</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Add Units</h3>
+<EditForm Model = "formModel" OnValidSubmit="Save">
+    <div><label>Unit Code: <InputText @bind-Value="formModel.UnitCode" /></label></div>
+    <div><label>Name: <InputText @bind-Value="formModel.Name" /></label></div>
+    <div><label>Credit Points: <InputNumber @bind-Value="formModel.CreditPoints" /></label></div>
+    <button class="btn btn-primary mt-2" type="submit">Add</button>
+</EditForm>
+
+@code {
+    private List<Unit> units = new();
+    private Unit formModel = new();
+    protected override async Task OnInitializedAsync() => await Load();
+
+    protected async Task Load()
+    {
+        using var db = DbFactory.CreateDbContext();
+        units = await db.Units.ToListAsync();
+    }
+    private async Task Save()
+    {
+        using var db = DbFactory.CreateDbContext();
+        db.Units.Add(formModel);
+        await db.SaveChangesAsync();
+        formModel = new Unit();
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        var u = await db.Units.FindAsync(id);
+        if (u != null) { db.Units.Remove(u); await db.SaveChangesAsync(); }
+        await Load();
+
+    }
+
+}
