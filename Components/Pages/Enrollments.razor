@@ -76,7 +76,7 @@
         using var db = DbFactory.CreateDbContext();
         db.Enrollments.Add(formModel);
         await db.SaveChangesAsync();
-        formModel = new Enrollment { StudentId = students.First().Id, UnitId = units.First().Id };
+        formModel = new Enrollment { StudentId = students.First().Id, UnitId = units.First().Id};
         await Load();
     }
 

@@ -59,7 +59,7 @@
 
     private void OnRoleChanged(ChangeEventArgs e)
     {
-        CurrentUser.Role = e.Value?.ToString() == "Students" ? UserRole.Student : UserRole.Admin;
+        CurrentUser.Role = e.Value?.ToString() == "Student" ? UserRole.Student : UserRole.Admin;
         if (CurrentUser.Role == UserRole.Admin) CurrentUser.StudentId = null;
     }
     private void OnStudentChanged(ChangeEventArgs e)

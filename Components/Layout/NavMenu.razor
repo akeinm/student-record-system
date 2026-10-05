@@ -46,9 +46,9 @@
         CurrentUser.OnChange += StateHasChanged;
     }
 
-    public void Dispose ()
+    public void Dispose()
     {
-        CurrentUser.OnChange += StateHasChanged;
+        CurrentUser.OnChange -= StateHasChanged;
     }
 }
 
