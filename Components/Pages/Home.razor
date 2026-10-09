@@ -1,5 +1,123 @@
 ﻿@page "/"
+@implements IDisposable
+@using Microsoft.EntityFrameworkCore
+@using StudentRecordSystem.Data
+@using StudentRecordSystem.Services
+@inject CurrentUserService CurrentUser
+@inject IDbContextFactory<AppDbContext> DbFactory
 
 <PageTitle>Student Record System</PageTitle>
 
 <h1>Student Record System</h1>
+<p class="text-muted">CSP3341 - Programming Languages and Paradigms. Developed in C#</p>
+
+@if (CurrentUser.Role == UserRole.Admin)
+{
+    <div class="row g-3 mt-2">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-muted small">Students</div>
+                <div class="fs-2 fw-semibold">@studentCount</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-muted small">Courses</div>
+                <div class="fs-2 fw-semibold">@courseCount</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-muted small">Units</div>
+                <div class="fs-2 fw-semibold">@unitCount</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-muted small">Enrollments</div>
+                <div class="fs-2 fw-semibold">@enrollmentCount</div>
+            </div></div>
+        </div>
+    </div>
+
+    <h5 class="mt-5 mb-3">Manage records</h5>
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+            <a href="/students" class="text-decoration-none">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 4px solid #6f42c1 !important;">
+                <div class="card-body">
+                    <h5 class="card-title">Students</h5>
+                    <p class="card-text text-muted small">Add, edit and manage student records.</p>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="/courses" class="text-decoration-none">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 4px solid #0d6efd !important;">
+                <div class="card-body">
+                    <h5 class="card-title">Courses</h5>
+                    <p class="card-text text-muted small">Manage courses and credit point totals.</p>
+                </div>
+            </div>
+            </a>
+        </div>    
+
+        <div class="col-md-6 col-lg-3">
+            <a href="/units" class="text-decoration-none">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 4px solid #6f42c1 !important;">
+                <div class="card-body">
+                    <h5 class="card-title">Units</h5>
+                    <p class="card-text text-muted small">Manage units and their credit points.</p>
+                </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <a href="/enrollments" class="text-decoration-none">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 4px solid #6f42c1 !important;">
+                <div class="card-body">
+                    <h5 class="card-title">Enrollments</h5>
+                    <p class="card-text text-muted small">Enrol students and enter marks.</p>
+                </div>
+            </div>
+            </a>
+        </div>
+    </div>
+}
+
+else
+{
+    <h5 class="mt-5 mb-3">My account</h5>
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-4">
+            <a href="/myrecord" class="text-decoration-none">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 4px solid #6f42c1 !important;">
+                <div class="card-body">
+                    <h5 class="card-title">My Record</h5>
+                    <p class="card-text text-muted small">View your units, marks and the current WAM.</p>
+                </div>
+            </div>
+            </a>
+        </div>
+    </div>
+}
+
+@code {
+        private int studentCount, courseCount, unitCount, enrollmentCount;
+
+        protected override async Task OnInitializedAsync()
+        {
+            CurrentUser.OnChange += OnUserChanged;
+            using var db = DbFactory.CreateDbContext();
+            studentCount = await db.Students.CountAsync();
+            courseCount = await db.Courses.CountAsync();
+            unitCount = await db.Units.CountAsync();
+            enrollmentCount = await db.Enrollments.CountAsync();
+        }
+
+        private void OnUserChanged() => InvokeAsync(StateHasChanged);
+
+        public void Dispose() => CurrentUser.OnChange -= OnUserChanged;
+    }
