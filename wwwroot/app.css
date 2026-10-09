@@ -58,3 +58,29 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.content { padding-top: 1.5rem; padding-bottom: 2rem; }
+h1 { margin-bottom: 1.25rem; }
+h3 { margin-top: 2.5rem; margin-bottom: 1rem; }
+
+.table { margin-bottom: 1.5rem; }
+.table th, .table td { padding: .75rem 1rem; vertical-align: middle; }
+.table td .btn + .btn { margin-left: .5rem; }
+
+.content form { max-width: 460px; }
+.content form > div { margin-bottom: 1rem; }
+.content form label { display: block; width: 100%; font-weight: 500; }
+.content form input:not([type=checkbox]),
+.content form select {
+    display: block;
+    width: 100%;
+    margin-top: .35rem;
+    padding: .5rem .75rem;
+    font-weight: 400;
+}
+
+.content form .btn { margin-top: .5rem; margin-right: .5rem; }
+
+.top-row select { padding: .3rem .6rem; }
+
+
