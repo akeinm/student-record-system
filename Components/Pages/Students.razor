@@ -36,10 +36,25 @@ else
 
     <h3>@(editingId == null ? "Add Student" : "Edit Student") </h3>
     <EditForm Model="formModel" OnValidSubmit="Save">
-        <div><label>Student Number: <InputText @bind-Value="formModel.StudentNumber" /></label></div>
+        <div>
+            <label>Student Number: <InputText @bind-Value="formModel.StudentNumber" /></label>
+            <div class="form-text">Exactly 8 digits, e.g. 10906788</div>
+        </div>
         <div><label>Full Name: <InputText @bind-Value="formModel.FullName" /></label></div>
-        <div><label>Email: <InputText @bind-Value="formModel.Email" /></label></div>
-        <div><label>Status: <InputText @bind-Value="formModel.AcademicStatus" /></label></div>
+        <div>
+            <label>Email: <InputText @bind-Value="formModel.Email" /></label>
+            <div class="form-text">Format: name@example.com</div>
+        </div>
+        <div>
+            <label>Status:
+                <InputSelect @bind-Value="formModel.AcademicStatus">
+                    <option value="Active">Active</option>
+                    <option value="On Leave">On Leave</option>
+                    <option value="Suspended">Suspended</option>
+                    <option value="Graduated">Graduated</option>
+                </InputSelect>
+            </label>
+        </div>
         <div>
             <label>Course:
                 <select @bind="formModel.CourseId">
