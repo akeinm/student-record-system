@@ -20,7 +20,7 @@ else if (student == null)
 }
 else
 {
-    <p><strong>@student.FullName</strong> (@student.StudentNumber) &&middot; @course?.Name</p>
+    <p><strong>@student.FullName</strong> (@student.StudentNumber) &middot; @course?.Name</p>
     <p>Status: @student.AcademicStatus</p>
 
     <table class="table">
@@ -40,7 +40,7 @@ else
 
     <div style="background: #f0eaff; color: #212529; padding: 10px 16px; display:inline-block; border-radius: 6px;">
         <div>Current WAM</div>
-        <div style="font-size: 1.8rem; font-weigh: 600;">@WamCalculator.CalculateWam(student)</div>
+        <div style="font-size: 1.8rem; font-weight: 600;">@WamCalculator.CalculateWam(student)</div>
     </div>
 }
 
